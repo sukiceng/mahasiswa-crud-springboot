@@ -1,102 +1,107 @@
-const apiUrl = "http://localhost:8080/api/mahasiswa";
+const API_URL = 'http://localhost:8080/api/mahasiswa'; // Panggil API yang dibuat di springboot
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadMahasiswa();
+// Fungsi load semua data mhs
+async function loadMahasiswa() {
+    const response = await fetch(API_URL);
+    const result = await response.json();
+    const data = result.data;
+    const table = document.getElementById("mahasiswaTable");
+    table.innerHTML = "";
 
-  document.getElementById("mahasiswaForm").addEventListener("submit", async function (e) {
+    data.forEach(mahasiswa => {
+        const usia = hitungUsia(mahasiswa.tanggalLahir);
+        const namaLengkap = mahasiswa.namaDepan + (mahasiswa.namaBelakang ? ` ${mahasiswa.namaBelakang}` : "");
+        table.innerHTML += `
+            <tr>
+                <td>${mahasiswa.nim}</td>
+                <td>${namaLengkap}</td>
+                <td>${usia}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="showEditModal(${mahasiswa.id}, '${mahasiswa.nim}', '${mahasiswa.namaDepan}', '${mahasiswa.namaBelakang}', '${mahasiswa.tanggalLahir}')">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="hapusMahasiswa(${mahasiswa.id})">Hapus</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Fungsi hitung usia
+function hitungUsia(tanggalLahir) {
+    const today = new Date();
+    const birthDate = new Date(tanggalLahir);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+// Tambah mhs
+document.getElementById("tambahMahasiswaForm").addEventListener("submit", async function (e) {
     e.preventDefault();
-
     const mahasiswa = {
-      nim: document.getElementById("nim").value,
-      namaDepan: document.getElementById("namaDepan").value,
-      namaBelakang: document.getElementById("namaBelakang").value,
-      tanggalLahir: document.getElementById("tanggalLahir").value
+        nim: document.getElementById("tambahNim").value,
+        namaDepan: document.getElementById("tambahNamaDepan").value,
+        namaBelakang: document.getElementById("tambahNamaBelakang").value,
+        tanggalLahir: document.getElementById("tambahTanggalLahir").value
     };
 
-    await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(mahasiswa)
+    await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mahasiswa)
     });
 
-    this.reset();
+    document.getElementById("tambahMahasiswaForm").reset();
+    const tambahModal = bootstrap.Modal.getInstance(document.getElementById("tambahModal"));
+    tambahModal.hide();
     loadMahasiswa();
-  });
 });
 
-async function loadMahasiswa() {
-  const response = await fetch(apiUrl);
-  const result = await response.json();
-  const table = document.getElementById("mahasiswaTable");
-  table.innerHTML = "";
+// Tampilkan form edit mhs
+function showEditModal(id, nim, namaDepan, namaBelakang, tanggalLahir) {
+    document.getElementById("editId").value = id;
+    document.getElementById("editNim").value = nim;
+    document.getElementById("editNamaDepan").value = namaDepan;
+    document.getElementById("editNamaBelakang").value = namaBelakang;
+    document.getElementById("editTanggalLahir").value = tanggalLahir;
 
-  result.data.forEach(m => {
-    const namaLengkap = `${m.namaDepan}${m.namaBelakang ? ' ' + m.namaBelakang : ''}`;
-    const usia = hitungUsia(m.tanggalLahir);
-
-    table.innerHTML += `
-      <tr>
-        <td>${m.nim}</td>
-        <td>${namaLengkap}</td>
-        <td>${usia} tahun</td>
-        <td>
-            <button class="btn btn-sm btn-warning me-1" onclick="bukaModalEdit(${m.id}, '${m.nim}', '${m.namaDepan}', '${m.namaBelakang}', '${m.tanggalLahir}')">Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="hapusMahasiswa(${m.id})">Hapus</button>
-        </td>
-      </tr>
-    `;
-  });
+    const editModal = new bootstrap.Modal(document.getElementById("editModal"));
+    editModal.show();
 }
 
-function hitungUsia(tanggal) {
-  const birth = new Date(tanggal);
-  const today = new Date();
-  let usia = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-    usia--;
-  }
-  return usia;
-}
-
-async function hapusMahasiswa(id) {
-  if (confirm("Yakin ingin menghapus data ini?")) {
-    await fetch(`${apiUrl}/${id}`, {
-      method: "DELETE"
-    });
-    loadMahasiswa();
-  }
-}
-
-function bukaModalEdit(id, nim, namaDepan, namaBelakang, tanggalLahir) {
-  document.getElementById("editId").value = id;
-  document.getElementById("editNim").value = nim;
-  document.getElementById("editNamaDepan").value = namaDepan;
-  document.getElementById("editNamaBelakang").value = namaBelakang;
-  document.getElementById("editTanggalLahir").value = tanggalLahir;
-
-  const modal = new bootstrap.Modal(document.getElementById("editModal"));
-  modal.show();
-}
-
+// Edit mahasiswa
 document.getElementById("editMahasiswaForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
+    e.preventDefault();
+    const id = document.getElementById("editId").value;
+    const mahasiswa = {
+        nim: document.getElementById("editNim").value,
+        namaDepan: document.getElementById("editNamaDepan").value,
+        namaBelakang: document.getElementById("editNamaBelakang").value,
+        tanggalLahir: document.getElementById("editTanggalLahir").value
+    };
 
-  const id = document.getElementById("editId").value;
-  const updatedMahasiswa = {
-    nim: document.getElementById("editNim").value,
-    namaDepan: document.getElementById("editNamaDepan").value,
-    namaBelakang: document.getElementById("editNamaBelakang").value,
-    tanggalLahir: document.getElementById("editTanggalLahir").value
-  };
+    await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mahasiswa)
+    });
 
-  await fetch(`${apiUrl}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updatedMahasiswa)
-  });
+    const editModal = bootstrap.Modal.getInstance(document.getElementById("editModal"));
+    editModal.hide();
+    loadMahasiswa();
+});
 
-  const modal = bootstrap.Modal.getInstance(document.getElementById("editModal"));
-  modal.hide();
+// Fungsi untuk hapus data mahasiswa
+async function hapusMahasiswa(id) {
+    if (confirm("Yakin ingin menghapus data mahasiswa ini?")) {
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        loadMahasiswa();
+    }
+}
+
+// Jalankan saat awal
+document.addEventListener("DOMContentLoaded", () => {
   loadMahasiswa();
 });
