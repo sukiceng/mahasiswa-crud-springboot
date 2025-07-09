@@ -6,10 +6,10 @@ This is a simple CRUD application for managing university students built using *
 
 ## 🧰 Tech Stack
 
-- **Java** — Core programming language
-- **Spring Boot** — Backend framework for building RESTful APIs
-- **MySQL** — Relational database to store student data
-- **HTML + Bootstrap 5** — Frontend design for a responsive UI
+- **Java** : Core programming language
+- **Spring Boot** : Backend framework for building RESTful APIs
+- **MySQL** : Relational database to store student data
+- **HTML + Bootstrap 5** : Frontend design for a responsive user interface
 
 ---
 
