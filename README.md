@@ -4,6 +4,15 @@ This is a simple CRUD application for managing university students built using *
 
 ---
 
+## 🧰 Tech Stack
+
+- **Java** — Core programming language
+- **Spring Boot** — Backend framework for building RESTful APIs
+- **MySQL** — Relational database to store student data
+- **HTML + Bootstrap 5** — Frontend design for a responsive UI
+
+---
+
 ## Project Structure
 
 - **main branch**: Frontend (Bootstrap HTML)
@@ -34,7 +43,7 @@ spring.jpa.show-sql=true
 ```
 Make sure you have created a database named mahasiswa_db in your MySQL database.
 
-3. Run the Spring Boot App
+#### 3. Run the Spring Boot App
 Using IntelliJ or via terminal:
 ```bash
 ./mvnw spring-boot:run
@@ -52,4 +61,16 @@ git checkout main
 #### 2. Open in Browser : 
 Open the index.html file directly in your browser, or use Live Server extension in VS Code for a better experience.
 #### 3. Make Sure Backend is Running
+
+---
+
+## API Endpoints
+| Method | Endpoint              | Description          |
+| ------ | --------------------- | -------------------- |
+| GET    | `/api/mahasiswa`      | Get all students     |
+| GET    | `/api/mahasiswa/{id}` | Get student by ID    |
+| POST   | `/api/mahasiswa`      | Add new student      |
+| PUT    | `/api/mahasiswa/{id}` | Update student by ID |
+| DELETE | `/api/mahasiswa/{id}` | Delete student by ID |
+
 
